@@ -134,6 +134,32 @@ if user_role == "admin":
             col4.metric("Study plans", stats["total_study_plans"])
         except Exception as error:
             st.error(f"Could not load admin statistics: {error}")
+                    st.divider()
+        st.subheader("Usage trends · last 14 days")
+
+        try:
+            trend_response = supabase.rpc(
+                "get_admin_usage_trends",
+                {},
+            ).execute()
+
+            trend_data = trend_response.data or []
+
+            if trend_data:
+                chart_rows = [
+                    {
+                        "Date": row["usage_date"],
+                        "New students": row["new_students"],
+                        "Quiz attempts": row["quizzes_completed"],
+                        "Study plans saved": row["plans_saved"],
+                    }
+                    for row in trend_data
+                ]
+                st.line_chart(chart_rows, x="Date")
+            else:
+                st.info("No usage data yet.")
+        except Exception as error:
+            st.error(f"Could not load usage trends: {error}")
 
         st.stop()
 
